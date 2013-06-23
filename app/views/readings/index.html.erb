@@ -1,0 +1,36 @@
+<%- model_class = Reading -%>
+<div class="page-header">
+  <h1><%=t '.title', :default => model_class.model_name.human.pluralize.titleize %></h1>
+</div>
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th><%= model_class.human_attribute_name(:meter_id) %></th>
+      <th><%= model_class.human_attribute_name(:value) %></th>
+      <th><%=t '.actions', :default => t("helpers.actions") %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @readings.sort {|x,y| x.created_at <=> y.created_at }.each do |reading| %>
+      <tr>
+        <td><%= link_to l(reading.created_at, :format => :long), reading_path(reading) %></td>
+        <td><%= reading.meter.name %></td>
+        <td><%= reading.value %></td>
+        <td>
+          <%= link_to t('.edit', :default => t("helpers.links.edit")),
+                      edit_reading_path(reading), :class => 'btn btn-mini' %>
+          <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+                      reading_path(reading),
+                      :method => :delete,
+                      :data => { :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')) },
+                      :class => 'btn btn-mini btn-danger' %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= link_to t('.new', :default => t("helpers.links.new")),
+            new_reading_path,
+            :class => 'btn btn-primary' %>

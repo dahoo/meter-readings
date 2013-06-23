@@ -1,0 +1,120 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Name:</b>
+  <%= @meter.name %>
+</p>
+
+<p>
+  <b>Price per unit:</b>
+  <%= @meter.price %> €
+</p>
+
+<% unless @readings.empty? %>
+<p>
+  <b>Estimated current value:</b>
+  <%= "%.1f %s" % [@current_value, @meter.unit] %>
+</p>
+
+<p>
+  <b>Per month:</b>
+  <%= ("%.1f %s, %.2f €") % [@per_month, @meter.unit, @cost_per_month] %>
+</p>
+
+<p>
+  <b>Per year:</b>
+  <%= ("%.1f %s, %.2f €") % [@per_year, @meter.unit, @cost_per_year] %>
+</p>
+
+<!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+
+      // Load the Visualization API and the piechart package.
+      google.load('visualization', '1.0', {'packages':['corechart']});
+
+      // Set a callback to run when the Google Visualization API is loaded.
+      google.setOnLoadCallback(drawChart);
+
+      // Callback that creates and populates a data table,
+      // instantiates the pie chart, passes in the data and
+      // draws it.
+      function drawChart() {
+
+        // Create the data table.
+        var data = new google.visualization.DataTable();
+        data.addColumn('date', 'Date');
+        data.addColumn('number', 'Reading');
+        data.addColumn('number', 'Predicted');
+        data.addRows([
+        <% if true %>
+	        <% @dates.each do |date| %>
+	        	<% if @readings_day.keys.include? date %>
+	        		<% reading = @readings_day[date].first %>
+					  	[new Date(<%= date.year %>, <%= date.month- 1 %> ,<%= date.day %>), <%= reading.value %>, NaN],
+						<% end %>
+					<% end %>
+					<% date = @readings_day.keys.sort().last %>
+					<% reading = @readings_day[date].first %>
+						[new Date(<%= date.year %>, <%= date.month- 1 %> ,<%= date.day %>), NaN, <%= reading.value %>],
+						<% date = Date.today %>
+						[new Date(<%= date.year %>, <%= date.month- 1 %> ,<%= date.day %>), NaN, <%= @current_value %>],
+				<% else %>
+					<% @months.each do |month| %>
+	        	<% if @readings_month.keys.include? month %>
+	        		<% puts month.to_s, @readings_month, @readings_month[month]%>
+	        		<% reading = @readings_month[month].first %>
+					  	[new Date(<%= month.year %>, <%= month.month - 1%>), <%= reading.value %>],
+						<% end %>
+					<% end %>
+				<% end %>
+        ]);
+
+        // Set chart options
+        var options = {'title':'<%= @meter.name %>',
+                       //'width':600,
+                       'height':300,
+                       vAxis: {title: '<%= @meter.unit %>'},
+                       curveType:'function',
+                       'lineWidth':2,
+                       'interpolateNulls':true,
+                       'min':0,
+                       'hAxis':{ gridlines:{count: <%= @readings_month.length %>}},
+                       };
+
+        // Instantiate and draw our chart, passing in some options.
+        var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+        
+        
+        var data = google.visualization.arrayToDataTable([
+          ['Month', 'Consumption', 'Average'],
+          <% @months.each do |month| %>
+	          <% if @consumption_month.keys.include? month %>
+	          	['<%= month.strftime('%b %y') %>',  <%= "%.1f" % @consumption_month[month] %>,  <%= "%.1f" % @per_month %>],
+	          	<% else %>
+	          	['<%= month.strftime('%b %y') %>',  NaN,  <%= "%.1f" % @per_month %>],
+	          <% end %>
+          <% end %>
+        ]);
+
+        var options = {
+          title: 'Per month',
+          vAxis: {title: '<%= @meter.unit %>'},
+          min: 0,
+          seriesType: "bars",
+          series: {1: {type: "line"}}
+        };
+
+        var chart = new google.visualization.ComboChart(document.getElementById('bar_chart_div'));
+        chart.draw(data, options);
+      }
+    </script>
+    
+    <div id="chart_div"></div>
+    <div id="bar_chart_div"></div>
+
+<% end %>
+
+<%= link_to 'Edit', edit_meter_path(@meter) %> |
+<%= link_to 'Back', meters_path %>

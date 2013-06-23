@@ -1,0 +1,12 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+electricity:
+  name: Electricity
+  unit: kWh
+  price: 0.2
+  user: <%= User.first %>
+
+water:
+  name: Water
+  unit: m³
+  user: <%= User.first %>

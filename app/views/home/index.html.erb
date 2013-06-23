@@ -1,0 +1,30 @@
+<div class="page-header">
+  <h1><%=t "Meters" %></h1>
+</div>
+
+<% if user_signed_in? %>
+<div class="row-fluid">
+<% @meters.each do |meter| %>
+		
+		<div class="span2">
+		<h2><%= meter.name %></h2>
+		<div class="span10">
+			<a href="<%= meter_path(meter) %>"<dl class="palette palette-night btn">
+            <dt>Estimation:</dt>
+            <dd>  <%= "%.1f" % @current_values[meter] %></dd>
+          </dl></a>
+          </div>
+    
+	</div>
+	<% end %>
+	<% else %>
+	<div class="hero-unit">
+  <h1>Manage all your meters</h1>
+  <p>Enter readings, see statistics and expenses</p>
+  <p>
+  	<%= link_to "Sign up", new_user_registration_path, :class => "btn btn-primary btn-large"  %>
+  </p>
+	</div>
+	<% end %>
+	</div>
+
